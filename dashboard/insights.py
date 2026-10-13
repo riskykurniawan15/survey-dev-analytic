@@ -66,6 +66,103 @@ def experience_by_role(df: pd.DataFrame, min_people: int = 8) -> pd.DataFrame:
     return profile.sort_values(["median_pengalaman", "responden"], ascending=[False, False]).reset_index(drop=True)
 
 
+LEADER_ROLES = (
+    ("Architect, software or solutions", "arsitek perangkat lunak"),
+    ("Engineering manager", "manajer rekayasa"),
+    ("Senior executive (C-suite, VP, etc.)", "eksekutif senior"),
+    ("Project manager", "manajer proyek"),
+    ("Product manager", "manajer produk"),
+)
+OLDER_AGES = {"55-64 years old", "65 years or older"}
+
+
+def _years(value: float) -> str:
+    return f"{value:.1f}".replace(".", ",")
+
+
+def _role_snapshot(df: pd.DataFrame, role: str) -> dict | None:
+    group = df[df["dev_type"] == role]
+    experience = group["work_exp"].dropna()
+    if experience.empty:
+        return None
+    aged = group["age"].dropna()
+    return {
+        "n": int(len(experience)),
+        "median": float(experience.median()),
+        "q1": float(experience.quantile(0.25)),
+        "long_share": float((experience >= 25).mean()),
+        "older_share": float(aged.isin(OLDER_AGES).mean()) if not aged.empty else None,
+    }
+
+
+def role_experience_note(df: pd.DataFrame, min_people: int = 15) -> str | None:
+    if df.empty or "dev_type" not in df.columns:
+        return None
+    snapshots = {role: _role_snapshot(df, role) for role, _label in LEADER_ROLES}
+    architect = snapshots["Architect, software or solutions"]
+    manager = snapshots["Engineering manager"]
+    sentences: list[str] = []
+
+    def piece(label: str, snap: dict) -> str:
+        return f"{label} {_years(snap['median'])} tahun ({_count(snap['n'])} orang)"
+
+    if architect and manager:
+        gap = architect["median"] - manager["median"]
+        if gap > 0.05:
+            compare = f"Arsitek lebih tinggi {_years(gap)} tahun."
+        elif gap < -0.05:
+            compare = f"Manajer rekayasa lebih tinggi {_years(abs(gap))} tahun."
+        else:
+            compare = "Median keduanya sama."
+        sentences.append(
+            "Pada filter ini, median "
+            + piece("arsitek perangkat lunak", architect)
+            + " dan "
+            + piece("manajer rekayasa", manager)
+            + f". {compare}"
+        )
+        if architect["n"] >= 8 and manager["n"] >= 8:
+            sentences.append(
+                f"Kuartil bawah {_years(architect['q1'])} tahun pada arsitek dan "
+                f"{_years(manager['q1'])} tahun pada manajer rekayasa. "
+                f"Pengalaman 25 tahun atau lebih: {_pct(100 * architect['long_share'])} arsitek dan "
+                f"{_pct(100 * manager['long_share'])} manajer rekayasa."
+            )
+            if (
+                architect["older_share"] is not None
+                and manager["older_share"] is not None
+                and (architect["older_share"] > 0 or manager["older_share"] > 0)
+            ):
+                sentences.append(
+                    f"Usia 55 tahun ke atas: {_pct(100 * architect['older_share'])} arsitek dan "
+                    f"{_pct(100 * manager['older_share'])} manajer rekayasa."
+                )
+    elif architect or manager:
+        label, snap = ("arsitek perangkat lunak", architect) if architect else ("manajer rekayasa", manager)
+        status = "ikut tampil" if snap["n"] >= min_people else f"berada di bawah ambang {min_people} responden"
+        sentences.append(f"Pada filter ini, {piece(label, snap)} dan {status}.")
+
+    shown, hidden = [], []
+    for role, label in LEADER_ROLES[2:]:
+        snap = snapshots[role]
+        if snap is None:
+            continue
+        bit = piece(label, snap)
+        if snap["n"] >= min_people:
+            shown.append(bit)
+        else:
+            hidden.append(bit)
+    if shown:
+        sentences.append("Peran pimpinan lain yang ikut tampil: " + ", ".join(shown) + ".")
+    if hidden:
+        sentences.append(
+            f"Peran pimpinan di bawah ambang {min_people} responden: " + ", ".join(hidden) + "."
+        )
+    if not sentences:
+        return None
+    return " ".join(sentences)
+
+
 def top_share(series: pd.Series) -> tuple[str, float, int] | None:
     clean = series.dropna()
     if clean.empty:

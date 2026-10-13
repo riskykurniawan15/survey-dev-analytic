@@ -7,8 +7,16 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from database import CSV_PATH, DB_PATH, ensure_database, load_tables
-from gambar_laporan import report_pngs
-from insights import MIN_SALARY, build_brief, eta_squared, experience_by_role, skill_ranking, valid_salary
+from gambar_laporan import label_role, report_pngs
+from insights import (
+    MIN_SALARY,
+    build_brief,
+    eta_squared,
+    experience_by_role,
+    role_experience_note,
+    skill_ranking,
+    valid_salary,
+)
 
 AGE_ORDER = [
     "18-24 years old",
@@ -136,16 +144,6 @@ def label_remote(value: str | None) -> str:
         return "Hybrid, lebih kantor"
     if text.startswith("your choice"):
         return "Bebas pilih"
-    return value
-
-
-def label_role(value: str | None) -> str:
-    value = as_text(value)
-    if not value:
-        return "Tidak diisi"
-    if value.lower().startswith("developer, "):
-        role = value.split(", ", 1)[1]
-        return role[:1].upper() + role[1:]
     return value
 
 
@@ -460,13 +458,23 @@ def chart_experience_by_role(profile: pd.DataFrame) -> go.Figure:
 
 
 def render_role_link(filtered: pd.DataFrame) -> None:
-    profile = experience_by_role(filtered, min_people=15)
+    min_people = 40
+    profile = experience_by_role(filtered, min_people=min_people)
     if profile.empty:
         st.info("Peran dengan jumlah responden cukup belum tersedia pada filter ini.")
         return
 
+    top = profile.iloc[0]
+    st.caption(
+        f"Batang teratas pada filter ini: {label_role(top['dev_type'])}, "
+        f"median {years(top['median_pengalaman'])} tahun ({int(top['responden'])} orang). "
+        f"Grafik ini memakai ambang yang sama dengan gambar laporan, yaitu minimal {min_people} responden."
+    )
     association, sample_size = eta_squared(filtered, "dev_type", "work_exp")
     st.plotly_chart(chart_experience_by_role(profile), width="stretch", config={"displayModeBar": False})
+    note = role_experience_note(filtered, min_people=min_people)
+    if note:
+        st.caption(note)
     if association is None:
         st.caption("Data peran dan pengalaman pada filter ini belum cukup untuk mengukur kekuatannya.")
     else:
