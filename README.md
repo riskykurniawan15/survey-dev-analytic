@@ -1,6 +1,6 @@
 # Survey Dev Analytic
 
-Dashboard analisis subset Stack Overflow Developer Survey. Aplikasi membaca `so_dev_survey.csv`, menyimpannya ke SQLite, lalu menampilkan ringkasan, kompensasi, teknologi, dan adopsi AI.
+Dashboard analisis subset Stack Overflow Developer Survey. Aplikasi membaca `so_dev_survey.csv`, menyimpannya ke SQLite, lalu menampilkan ringkasan, kompensasi, teknologi, adopsi AI, dan uji hipotesis mode kerja.
 
 ## Requirement
 
@@ -16,6 +16,9 @@ Paket Python yang dipakai:
 | plotly | 5.24 |
 | streamlit | 1.40 |
 | matplotlib | 3.8 |
+| numpy | 2.0 |
+| scipy | 1.13 |
+| statsmodels | 0.14 |
 
 Daftar lengkap ada di `dashboard/requirements.txt`.
 
@@ -54,3 +57,5 @@ macOS atau Linux:
 Buka http://localhost:8501. Filter di samping yang dikosongkan berarti semua nilai pada kolom itu ikut dihitung.
 
 Di tab **Ringkasan** ada tombol unduh PNG. Tanpa filter, gambar memakai judul, label, satuan, dan warna yang sama dengan laporan. Filter mengubah angka di dalam gambar.
+
+Tab **Uji hipotesis** memakai data dan filter yang sama. Isinya: one-sample t-test kepuasan versus 7, Welch/independent t-test Remote versus Kantor, ANOVA + Tukey tiga mode kerja, serta ANOVA pelengkap pada log-gaji.

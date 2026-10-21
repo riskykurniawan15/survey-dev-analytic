@@ -8,6 +8,7 @@ import streamlit as st
 
 from database import CSV_PATH, DB_PATH, ensure_database, load_tables
 from gambar_laporan import label_role, report_pngs
+from hipotesis import render_hypothesis
 from insights import (
     MIN_SALARY,
     build_brief,
@@ -714,15 +715,15 @@ def main() -> None:
 
     st.title("Dashboard Survei Pengembang")
     st.markdown(
-        "Analisis responden, kompensasi, teknologi, dan adopsi AI. "
+        "Analisis responden, kompensasi, teknologi, adopsi AI, dan uji hipotesis mode kerja. "
         f"Sumber CSV dimuat ke SQLite (`{Path(DB_PATH).name}`) supaya jawaban ganda bisa dihitung per teknologi."
     )
 
     show_metrics(filtered, len(respondents))
     st.write("")
 
-    overview, pay, tech, ai, table = st.tabs(
-        ["Ringkasan", "Kompensasi", "Teknologi", "Adopsi AI", "Data"]
+    overview, pay, tech, ai, hypo, table = st.tabs(
+        ["Ringkasan", "Kompensasi", "Teknologi", "Adopsi AI", "Uji hipotesis", "Data"]
     )
     with overview:
         render_overview(filtered, skills)
@@ -732,6 +733,8 @@ def main() -> None:
         render_tech(filtered, skills)
     with ai:
         render_ai(filtered)
+    with hypo:
+        render_hypothesis(filtered)
     with table:
         render_table(filtered)
 
