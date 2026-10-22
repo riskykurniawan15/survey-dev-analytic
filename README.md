@@ -58,4 +58,4 @@ Buka http://localhost:8501. Filter di samping yang dikosongkan berarti semua nil
 
 Di tab **Ringkasan** ada tombol unduh PNG. Tanpa filter, gambar memakai judul, label, satuan, dan warna yang sama dengan laporan. Filter mengubah angka di dalam gambar.
 
-Tab **Uji hipotesis** memakai data dan filter yang sama. Isinya: one-sample t-test kepuasan versus 7, Welch/independent t-test Remote versus Kantor, ANOVA + Tukey tiga mode kerja, serta ANOVA pelengkap pada log-gaji.
+Tab **Uji hipotesis** memakai data dan filter yang sama. Isinya: one-sample t-test kepuasan versus 7, Welch/independent t-test Remote versus Kantor, ANOVA + Tukey tiga mode kerja, serta ANOVA pelengkap pada log-gaji. Di tab itu juga ada tombol unduh PNG (boxplot, mean±SD, Q–Q, Tukey, median gaji) dengan judul dan gaya yang sama dengan laporan uji hipotesis.

@@ -508,8 +508,7 @@ def render_role_link(filtered: pd.DataFrame) -> None:
 def render_report_downloads(people: pd.DataFrame) -> None:
     st.subheader("Unduh grafik laporan")
     st.caption(
-        "PNG ini memakai judul, label, satuan, dan warna yang sama dengan gambar di laporan Word. "
-        "Tanpa filter, berkasnya sama dengan dokumen. Filter di samping mengubah angka di dalam gambar."
+        "Filter di samping mengubah angka di dalam gambar."
     )
     names = ["Usia", "Pengalaman", "Gaji", "Sebaran", "Peran"]
     columns = st.columns(5)

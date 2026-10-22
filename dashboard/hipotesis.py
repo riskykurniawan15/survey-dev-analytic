@@ -17,6 +17,7 @@ from analisis import (
     qq_points,
     run_all,
 )
+from gambar_hipotesis import report_pngs
 
 
 def style_figure(fig: go.Figure, title: str, height: int = 400) -> go.Figure:
@@ -184,6 +185,27 @@ def render_hypothesis(people) -> None:
     if frame.empty or one is None:
         st.info("Filter ini belum cukup untuk uji kepuasan. Longgarkan mode kerja atau negara.")
         return
+
+    st.subheader("Unduh grafik laporan")
+    st.caption(
+        "Filter di samping mengubah angka di dalam gambar."
+    )
+    names = ["Boxplot", "Mean±SD", "Q-Q", "Tukey", "Gaji"]
+    columns = st.columns(5)
+    for column, name, (filename, label, png) in zip(columns, names, report_pngs(result)):
+        with column:
+            if png is None:
+                st.caption(f"{name}: data belum cukup.")
+            else:
+                st.download_button(
+                    name,
+                    data=png,
+                    file_name=filename,
+                    mime="image/png",
+                    key=f"unduh-hipotesis-{filename}",
+                    help=label,
+                    width="stretch",
+                )
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Ringkasan", "Asumsi", "Hasil uji", "Gaji (pelengkap)", "Rekomendasi"])
 
