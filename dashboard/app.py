@@ -9,6 +9,8 @@ import streamlit as st
 from database import CSV_PATH, DB_PATH, ensure_database, load_tables
 from gambar_laporan import label_role, report_pngs
 from hipotesis import render_hypothesis
+from tampilan_regresi import render_regression
+from tampilan_regresi_sederhana import render_simple_regression
 from insights import (
     MIN_SALARY,
     build_brief,
@@ -721,8 +723,8 @@ def main() -> None:
     show_metrics(filtered, len(respondents))
     st.write("")
 
-    overview, pay, tech, ai, hypo, table = st.tabs(
-        ["Ringkasan", "Kompensasi", "Teknologi", "Adopsi AI", "Uji hipotesis", "Data"]
+    overview, pay, tech, ai, hypo, simple, regression, table = st.tabs(
+        ["Ringkasan", "Kompensasi", "Teknologi", "Adopsi AI", "Uji hipotesis", "Regresi sederhana", "Regresi berganda", "Data"]
     )
     with overview:
         render_overview(filtered, skills)
@@ -734,6 +736,10 @@ def main() -> None:
         render_ai(filtered)
     with hypo:
         render_hypothesis(filtered)
+    with simple:
+        render_simple_regression(filtered)
+    with regression:
+        render_regression(filtered)
     with table:
         render_table(filtered)
 
